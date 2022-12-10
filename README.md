@@ -65,17 +65,17 @@ Options:
 #### SQLite
 
 ```sh
-$ node . -k <encryption key> --sqlite <path to v3 database>
+$ node . --sqlite <path to v3 database>
 ```
 
 #### MySQL
 
 ```sh
-$ node . -k <encryption key> --v3 mysql://... --v4 mysql://...
+$ node . --v3 mysql://... --v4 mysql://...
 ```
 
 #### PostgreSQL
 
 ```sh
-$ node . -k <encryption key> --v3 postgresql://... --v4 postgresql://...
+$ node . --v3 postgresql://... --v4 postgresql://...
 ```
