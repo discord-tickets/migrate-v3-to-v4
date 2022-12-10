@@ -1,0 +1,33 @@
+{
+  "name": "migrate-v3-to-v4",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "eartharoid",
+  "license": "MIT",
+  "dependencies": {
+    "@prisma/client": "^4.7.1",
+    "commander": "^9.4.1",
+    "leeks.js": "^0.2.4",
+    "prisma": "^4.7.1",
+    "sequelize": "^6.26.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.29.0",
+    "mysql2": "^2.3.3",
+    "pg": "^8.8.0",
+    "pg-hstore": "^2.3.4",
+    "sqlite3": "^5.1.2"
+  },
+  "peerDependencies": {
+    "mysql2": "^2.3.3",
+    "pg": "^8.8.0",
+    "pg-hstore": "^2.3.4",
+    "sqlite3": "^5.1.2"
+  }
+}
