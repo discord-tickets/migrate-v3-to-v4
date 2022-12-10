@@ -21,11 +21,10 @@ $ git clone https://github.com/discord-tickets/migrate-v3-to-v4.git
 $ cp prisma/mysql.prisma prisma/schema.prisma
 ```
 
-3. Install dependencies with (P)NPM or Yarn (& generate the Prisma client)
+1. Install dependencies with (P)NPM or Yarn
 
 ```sh
 $ npm install
-$ npx prisma generate
 ```
 
 and one of the following:
@@ -38,10 +37,16 @@ $ npm install mysql2 # for MySQL
 $ npm install pg pg-hstore # for PostgreSQL
 ```
 
-4. Run the migrator
+4. Generate the Prisma client and baseline the database
 
 ```sh
-$ node . -k <encryption key> [options]
+$ npx prisma db push
+```
+
+5. Run the migrator
+
+```sh
+$ node . <options>
 ```
 
 ## Usage
@@ -51,7 +56,6 @@ Usage: migrate-v3-to-v4 [options]
 
 Options:
   -s, --sqlite <file>    v3 sqlite database file
-  -k, --key <key>        encryption key
   --v3 <url>             v3 database connection string
   --v4 <url>             v4 database connection string
   -p, --prefix <prefix>  v3 database table prefix (default: "dsctickets_")

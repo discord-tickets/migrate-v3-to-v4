@@ -1,4 +1,5 @@
-const { DataTypes } = require('sequelize');
+import { DataTypes } from 'sequelize';
+
 export default sequelize => {
 	const { DB_TABLE_PREFIX } = process.env;
 	sequelize.define('SurveyResponse', {

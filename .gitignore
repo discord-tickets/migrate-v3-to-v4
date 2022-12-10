@@ -1,2 +1,4 @@
 node_modules
 prisma/schema.prisma
+*.db
+*.sql*
