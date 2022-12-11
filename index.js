@@ -61,12 +61,18 @@ for (const v3 of guilds) {
 				blocklist: v3.blacklist.roles,
 				closeButton: v3.close_button,
 				createdAt: v3.createdAt, // createdAt is built-in to Sequelize so does not use the same casing as the other fields
-				errorColour: v3.error_colour,
+				errorColour: v3.error_colour?.startsWith('#')
+					? v3.error_colour
+					: v3.error_colour[0] + v3.error_colour.slice(1).toLowerCase(),
 				footer: v3.footer,
 				id: v3.id,
 				locale: v3.locale,
-				primaryColour: v3.colour,
-				successColour: v3.success_colour,
+				primaryColour: v3.colour?.startsWith('#')
+					? v3.colour
+					: v3.colour[0] + v3.colour.slice(1).toLowerCase(),
+				successColour: v3.success_colour?.startsWith('#')
+					? v3.success_colour
+					: v3.success_colour[0] + v3.success_colour.slice(1).toLowerCase(),
 			},
 		});
 	} catch { } // eslint-disable-line no-empty
