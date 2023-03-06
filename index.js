@@ -114,12 +114,14 @@ for (const v3 of tickets) {
 		await prisma.ticket.create({
 			data: {
 				archivedChannels: {
-					createMany: (await sequelize.models.ChannelEntity.findAll({ where: { ticket: v3.id } }))
-						.map(v3channel => ({
-							channelId: v3channel.channel,
-							createdAt: v3channel.createdAt,
-							name: v3channel.name,
-						})),
+					createMany: {
+						data: (await sequelize.models.ChannelEntity.findAll({ where: { ticket: v3.id } }))
+							.map(v3channel => ({
+								channelId: v3channel.channel,
+								createdAt: v3channel.createdAt,
+								name: v3channel.name,
+							})),
+					},
 				},
 				category: { connect: { id: categoryMap.get(v3.category) } },
 				claimedBy: (v3.claimed_by && {
