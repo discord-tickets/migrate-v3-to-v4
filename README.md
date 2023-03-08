@@ -21,7 +21,7 @@ $ git clone https://github.com/discord-tickets/migrate-v3-to-v4.git
 $ cp prisma/mysql.prisma prisma/schema.prisma
 ```
 
-1. Install dependencies with (P)NPM or Yarn
+3. Install dependencies with (P)NPM or Yarn
 
 ```sh
 $ npm install
