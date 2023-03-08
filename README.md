@@ -53,7 +53,7 @@ $ npx prisma db push
 > ```
 > **Windows example:**
 > ```bash
-> $ set V4_DB=mysql://... npx prisma db push
+> $ set V4_DB=mysql://...
 > $ npx prisma db push
 > ```
 
