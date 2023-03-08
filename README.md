@@ -57,7 +57,7 @@ $ npx prisma db push
 > $ npx prisma db push
 > ```
 
-4. Run the migrator
+5. Run the migrator
 
 ```sh
 $ node . <options>
