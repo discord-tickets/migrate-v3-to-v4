@@ -5,7 +5,8 @@ A tool to migrate data from version **3.1 to 4.0**.
 ## Limitations
 
 - This tool only works with version **3.1** of the bot. If you are using an older version, you will need to update to version **3.1** first.
-- This tool can't be used to change the database type (e.g. from SQLite to MySQL).
+- This tool can't be used to change the database type (e.g. from SQLite to MySQL). This isn't a technical limitation, so you can open an issue if you want this to be supported.
+- You need **two** databases.
 
 ## Steps
 
@@ -42,8 +43,21 @@ $ npm install pg pg-hstore # for PostgreSQL
 ```sh
 $ npx prisma db push
 ```
+> **Note**
+>
+> If you are using MySQL or PostgreSQL, you need to set the `V4_DB` environment variable to the connection string of your new database.
+> 
+> **Linux example:**
+> ```sh
+> $ V4_DB=mysql://... npx prisma db push
+> ```
+> **Windows example:**
+> ```bash
+> $ set V4_DB=mysql://... npx prisma db push
+> $ npx prisma db push
+> ```
 
-5. Run the migrator
+4. Run the migrator
 
 ```sh
 $ node . <options>
