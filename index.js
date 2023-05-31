@@ -4,12 +4,14 @@ import { PrismaClient } from '@prisma/client';
 import SQLiteMiddleware from './prisma/sqlite.js';
 import { Sequelize } from 'sequelize';
 import { readdirSync } from 'fs';
+import Cryptr from 'cryptr';
 
 program
 	.option('-s, --sqlite <file>', 'v3 sqlite database file')
 	.option('--v3 <url>', 'v3 database connection string')
 	.option('--v4 <url>', 'v4 database connection string')
-	.option('-p, --prefix <prefix>', 'v3 database table prefix', 'dsctickets_');
+	.option('-p, --prefix <prefix>', 'v3 database table prefix', 'dsctickets_')
+	.option('-k, --key <encryption key>', 'v3 encryption key', null);
 
 program.parse(process.argv);
 const options = program.opts();
@@ -24,6 +26,9 @@ if (!options.sqlite) {
 	process.env.V4_DB = options.v4;
 }
 
+if (!options.key) console.warn(colours.yellow('Archived messages will not be migrated because you didn\'t provide an encryption key. Press Ctrl+C to abort.'));
+
+const { decrypt } = options.key ? new Cryptr(options.key) : { decrypt: str => str };
 const type = options.sqlite ? 'sqlite' : options.v3.startsWith('mysql') ? ' mysql' : 'postgresql';
 
 // v3
@@ -75,7 +80,9 @@ for (const v3 of guilds) {
 					: v3.success_colour[0] + v3.success_colour.slice(1).toLowerCase(),
 			},
 		});
-	} catch { } // eslint-disable-line no-empty
+	} catch (error) {
+		console.error(colours.red(error));
+	}
 }
 
 const categoryMap = new Map(); // v3:v4
@@ -104,7 +111,9 @@ for (const v3 of categories) {
 			},
 		});
 		categoryMap.set(v3.id, v4.id);
-	} catch { } // eslint-disable-line no-empty
+	} catch (error) {
+		console.error(colours.red(error));
+	}
 }
 
 const tickets = await sequelize.models.Ticket.findAll();
@@ -115,12 +124,12 @@ for (const v3 of tickets) {
 			data: {
 				archivedChannels: {
 					createMany: {
-						data: (await sequelize.models.ChannelEntity.findAll({ where: { ticket: v3.id } }))
+						data: options.key ? (await sequelize.models.ChannelEntity.findAll({ where: { ticket: v3.id } }))
 							.map(v3channel => ({
 								channelId: v3channel.channel,
 								createdAt: v3channel.createdAt,
-								name: v3channel.name,
-							})),
+								name: decrypt(v3channel.name),
+							})) : [],
 					},
 				},
 				category: { connect: { id: categoryMap.get(v3.category) } },
@@ -156,83 +165,85 @@ for (const v3 of tickets) {
 			},
 		});
 
-		const roles = await sequelize.models.RoleEntity.findAll({ where: { ticket: v3.id } });
-		for (const v3role of roles) {
-			await prisma.archivedRole.create({
-				data: {
-					colour: v3role.colour,
-					createdAt: v3role.createdAt,
-					name: v3role.name,
-					roleId: v3role.role,
-					ticket: { connect: { id: v3.id } },
-				},
-			});
-		}
-
-		const users = await sequelize.models.UserEntity.findAll({ where: { ticket: v3.id } });
-		for (const v3user of users) {
-			await prisma.archivedUser.create({
-				data: {
-					avatar: v3user.avatar,
-					bot: v3user.bot,
-					createdAt: v3user.createdAt,
-					discriminator: v3user.discriminator,
-					displayName: v3user.display_name,
-					role: {
-						connect: {
-							ticketId_roleId: {
-								roleId: v3user.role,
-								ticketId: v3.id,
-							},
-						},
-					},
-					ticket: { connect: { id: v3.id } },
-					userId: v3user.user,
-					username: v3user.name,
-				},
-			});
-		}
-
-		const messages = await sequelize.models.Message.findAll({ where: { ticket: v3.id } });
-		for (const v3message of messages) {
-			let author = await prisma.archivedUser.findUnique({
-				where: {
-					ticketId_userId: {
-						ticketId: v3.id,
-						userId: v3message.author,
-					},
-				},
-			});
-			if (!author) {
-				author = await prisma.archivedUser.create({
+		if (options.key) {
+			const roles = await sequelize.models.RoleEntity.findAll({ where: { ticket: v3.id } });
+			for (const v3role of roles) {
+				await prisma.archivedRole.create({
 					data: {
-						discriminator: '0000',
-						displayName: 'Unknown User',
+						colour: v3role.colour,
+						createdAt: v3role.createdAt,
+						name: decrypt(v3role.name),
+						roleId: v3role.role,
 						ticket: { connect: { id: v3.id } },
-						userId: v3message.author,
-						username: 'Unknown User',
 					},
 				});
 			}
 
-			await prisma.archivedMessage.create({
-				data: {
-					author: {
-						connect: {
-							ticketId_userId: {
-								ticketId: v3.id,
-								userId: v3message.author,
+			const users = await sequelize.models.UserEntity.findAll({ where: { ticket: v3.id } });
+			for (const v3user of users) {
+				await prisma.archivedUser.create({
+					data: {
+						avatar: v3user.avatar,
+						bot: v3user.bot,
+						createdAt: v3user.createdAt,
+						discriminator: v3user.discriminator,
+						displayName: v3user.display_name,
+						role: {
+							connect: {
+								ticketId_roleId: {
+									roleId: v3user.role,
+									ticketId: v3.id,
+								},
 							},
 						},
+						ticket: { connect: { id: v3.id } },
+						userId: v3user.user,
+						username: v3user.name,
 					},
-					content: v3message.data,
-					createdAt: v3message.createdAt,
-					deleted: v3message.deleted,
-					edited: v3message.edited,
-					id: v3message.id,
-					ticket: { connect: { id: v3.id } },
-				},
-			});
+				});
+			}
+
+			const messages = await sequelize.models.Message.findAll({ where: { ticket: v3.id } });
+			for (const v3message of messages) {
+				let author = await prisma.archivedUser.findUnique({
+					where: {
+						ticketId_userId: {
+							ticketId: v3.id,
+							userId: v3message.author,
+						},
+					},
+				});
+				if (!author) {
+					author = await prisma.archivedUser.create({
+						data: {
+							discriminator: '0000',
+							displayName: 'Unknown User',
+							ticket: { connect: { id: v3.id } },
+							userId: v3message.author,
+							username: 'Unknown User',
+						},
+					});
+				}
+
+				await prisma.archivedMessage.create({
+					data: {
+						author: {
+							connect: {
+								ticketId_userId: {
+									ticketId: v3.id,
+									userId: v3message.author,
+								},
+							},
+						},
+						content: v3message.data,
+						createdAt: v3message.createdAt,
+						deleted: v3message.deleted,
+						edited: v3message.edited,
+						id: v3message.id,
+						ticket: { connect: { id: v3.id } },
+					},
+				});
+			}
 		}
 
 	} catch (error) {

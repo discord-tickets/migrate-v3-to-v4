@@ -69,11 +69,12 @@ $ node . <options>
 Usage: migrate-v3-to-v4 [options]
 
 Options:
-  -s, --sqlite <file>    v3 sqlite database file
-  --v3 <url>             v3 database connection string
-  --v4 <url>             v4 database connection string
-  -p, --prefix <prefix>  v3 database table prefix (default: "dsctickets_")
-  -h, --help             display help for command
+  -s, --sqlite <file>         v3 sqlite database file
+  --v3 <url>                  v3 database connection string
+  --v4 <url>                  v4 database connection string
+  -p, --prefix <prefix>       v3 database table prefix (default: "dsctickets_")
+  -k, --key <encryption key>  v3 encryption key (default: null)
+  -h, --help                  display help for command
 ```
 
 #### SQLite
@@ -85,11 +86,11 @@ $ node . --sqlite <path to v3 database>
 #### MySQL
 
 ```sh
-$ node . --v3 mysql://... --v4 mysql://...
+$ node . --v3 mysql://... --v4 mysql://... -k <encryption key>
 ```
 
 #### PostgreSQL
 
 ```sh
-$ node . --v3 postgresql://... --v4 postgresql://...
+$ node . --v3 postgresql://... --v4 postgresql://... -k <encryption key>
 ```
