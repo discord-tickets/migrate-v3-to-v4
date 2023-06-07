@@ -198,7 +198,7 @@ for (const v3 of tickets) {
 						},
 						ticket: { connect: { id: v3.id } },
 						userId: v3user.user,
-						username: v3user.name,
+						username: v3user.username,
 					},
 				});
 			}
